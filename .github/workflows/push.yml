@@ -82,6 +82,8 @@ jobs:
           ${{ secrets.GPG_SECRING }}
           EOF
           trap "rm -f $SECRING" EXIT
+          pwd
+          ls -la
       - name: Package charts
         env:
           CHARTS_JSON: ${{ steps.config.outputs.result }}
