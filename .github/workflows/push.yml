@@ -90,7 +90,7 @@ jobs:
           REF: ${{ steps.inputs.outputs.ref }}
         # await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
         # helm package --sign --key gross --keyring secring.gpg 
-        run: pwd
+        run: helm package --sign --key gross --keyring secring.gpg source -d gh-pages/siembol
       # - name: Update index
       #   working-directory: gh-pages
       #   run: |
