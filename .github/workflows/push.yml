@@ -100,7 +100,7 @@ jobs:
                     await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
                   }
                 }
-                await exec.exec('helm', ['package', '--sign --key gross --keyring secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
+                await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
             }
