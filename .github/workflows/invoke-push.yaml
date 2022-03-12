@@ -1,0 +1,40 @@
+name: Invoke Push
+
+on:
+  workflow_call:
+    secrets:
+      APP_ID:
+        description: 'The ID of the GitHub App that can trigger a workflow on this repo'
+        required: true
+      APP_PRIVATE_KEY:
+        description: 'The private key of the GitHub App that can trigger a workflow on this repo'
+        required: true
+
+jobs:
+  invoke-push:
+    runs-on: ubuntu-latest
+    environment: invoke-push
+    steps:
+      # TODO install @octokit/app and use it within github-script instead of relying on Step
+      - name: Install Step CLI
+        env: 
+          VERSION: 0.18.2
+        run: |
+          curl -sLO https://github.com/smallstep/cli/releases/download/v${VERSION}/step-cli_${VERSION}_arm64.deb
+          sudo dpkg -i step-cli_${VERSION}_amd64.deb
+          rm step-cli_${VERSION}_amd64.deb
+      - name: Create access token
+        id: token
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+        run: |
+          jwt=$(step crypto jwt sign --key /dev/fd/3 --issuer $APP_ID --expiration $(date -d +5min +%s) --subtle 3<<< $APP_PRIVATE_KEY)
+          installation_id=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations | jq '.[] | select(.account.login == "pavlovic-ivan") | .id')
+          token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations/$installation_id/access_tokens | jq -r '.token')
+          echo "::add-mask::$token"
+          echo "::set-output name=token::$token"
+      - name: Trigger push workflow
+        env:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+        run: gh workflow run push.yml -R pavlovic-ivan/charts -f owner=${{ github.event.repository.owner.login }} -f repo=${{ github.event.repository.name }} -f ref=${{ github.ref }}
