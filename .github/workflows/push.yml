@@ -76,7 +76,7 @@ jobs:
           path: source
       - name: Load private key
         env:
-          SECRING: secring.gpg
+          SECRING: private.key
         run: |
           cat > $SECRING << EOF
           ${{ secrets.GPG_SECRING }}
@@ -90,7 +90,9 @@ jobs:
           REF: ${{ steps.inputs.outputs.ref }}
         # await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
         # helm package --sign --key gross --keyring secring.gpg 
-        run: helm package --sign --key gross --keyring secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
+        run: |
+          gpg --import private.key
+          helm package --sign --key gross --keyring secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
       # - name: Update index
       #   working-directory: gh-pages
       #   run: |
