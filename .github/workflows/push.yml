@@ -74,6 +74,14 @@ jobs:
           repository: ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}
           ref: ${{ steps.inputs.outputs.ref }}
           path: source
+      - name: Load private key
+        env:
+          SECRING: secring.gpg
+        run: |
+          cat > $SECRING << EOF
+          ${{ secrets.GPG_SECRING }}
+          EOF
+          trap "rm -f $GOOGLE_APPLICATION_CREDENTIALS" EXIT
       - name: Package charts
         uses: actions/github-script@v6
         env:
@@ -92,7 +100,7 @@ jobs:
                     await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
                   }
                 }
-                await exec.exec('helm', ['package', source, '-d', `gh-pages/${chart.destination}`])
+                await exec.exec('helm', ['package', '--sign --key gross --keyring secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
             }
