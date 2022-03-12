@@ -82,6 +82,7 @@ jobs:
         # helm package --sign --key gross --keyring secring.gpg 
         run: |
           cat <(echo -e "${{ secrets.GPG_SECRING }}") | gpg --batch --import
+          gpg --export-secret-keys >~/.gnupg/secring.gpg
           gpg --list-keys
           helm package --sign --key gross --keyring secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
       # - name: Update index
