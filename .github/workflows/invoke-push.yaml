@@ -20,7 +20,7 @@ jobs:
         env: 
           VERSION: 0.18.2
         run: |
-          curl -sLO https://github.com/smallstep/cli/releases/download/v${VERSION}/step-cli_${VERSION}_arm64.deb
+          curl -sLO https://github.com/smallstep/cli/releases/download/v${VERSION}/step-cli_${VERSION}_amd64.deb
           sudo dpkg -i step-cli_${VERSION}_amd64.deb
           rm step-cli_${VERSION}_amd64.deb
       - name: Create access token
