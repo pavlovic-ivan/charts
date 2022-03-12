@@ -81,6 +81,7 @@ jobs:
         # await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
         # helm package --sign --key gross --keyring secring.gpg 
         run: |
+          echo -n ${{ secrets.GPG_SECRING }} | gpg --import --batch --yes
           gpg --list-keys
           helm package --sign --key gross --keyring secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
       # - name: Update index
