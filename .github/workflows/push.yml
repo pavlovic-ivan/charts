@@ -81,7 +81,7 @@ jobs:
           cat > $SECRING << EOF
           ${{ secrets.GPG_SECRING }}
           EOF
-          trap "rm -f $GOOGLE_APPLICATION_CREDENTIALS" EXIT
+          trap "rm -f $SECRING" EXIT
       - name: Package charts
         uses: actions/github-script@v6
         env:
