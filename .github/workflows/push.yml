@@ -74,16 +74,6 @@ jobs:
           repository: ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}
           ref: ${{ steps.inputs.outputs.ref }}
           path: source
-      - name: Load private key
-        env:
-          SECRING: private.key
-        run: |
-          cat > $SECRING << EOF
-          ${{ secrets.GPG_SECRING }}
-          EOF
-          trap "rm -f $SECRING" EXIT
-          pwd
-          ls -la
       - name: Package charts
         env:
           CHARTS_JSON: ${{ steps.config.outputs.result }}
@@ -91,7 +81,8 @@ jobs:
         # await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
         # helm package --sign --key gross --keyring secring.gpg 
         run: |
-          gpg --import private.key
+          echo ${{ secrets.GPG_SECRING }} | gpg --import
+          gpg --list-keys
           helm package --sign --key gross --keyring secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
       # - name: Update index
       #   working-directory: gh-pages
