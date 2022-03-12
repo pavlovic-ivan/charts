@@ -1,0 +1,19 @@
+{
+    "sources": [
+      {
+        "owner": "pavlovic-ivan",
+        "repo": "siembol",
+        "refs": [
+          {
+            "ref": "refs/heads/main"
+          }
+        ],
+        "charts": [
+          {
+            "source": "deployment/helm-k8s",
+            "destination": "siembol"
+          }
+        ]
+      }
+    ]
+  }

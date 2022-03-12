@@ -140,7 +140,7 @@ jobs:
           token=$(echo -n "x-access-token:${{ steps.token.outputs.token}}" | base64)
           git config --local --unset-all http.https://github.com/.extraheader
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $token"
-          git config --local user.name "G-Research charts"
-          git config --local user.email charts@gr-oss.io
+          git config --local user.name "Ivan's charts"
+          git config --local user.email charts@demo.io
           git commit -m "Publish helm chart ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}@${{ steps.inputs.outputs.ref }}"
           git push
