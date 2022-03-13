@@ -1,0 +1,36 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+apiVersion: v2
+description: Siembol is an open-source, real-time Security Information & Event Management
+  tool based on big data technologies, providing a scalable, advanced security analytics
+  framework
+home: https://github.com/G-Research/siembol
+keywords:
+- - kafka
+- - zookeeper
+- - storm
+- - hdfs
+- - security
+- - metron
+name: siembol
+sources:
+- - https://github.com/G-Research/siembol
+- - https://github.com/G-Research/charts/src/storm
+- - https://github.com/G-Research/siembol/deployment/helm-k8s
+type: application
+version: 0.1.10
+
+...
+files:
+  siembol-0.1.10.tgz: sha256:68b292a5ab6d788eae5772ce14874fe24df26e878df6580ab4ad17c4c91a73f6
+-----BEGIN PGP SIGNATURE-----
+
+wsBcBAEBCgAQBQJiLfb2CRD7KpBpjSFYyQAAyVAIAKTp0ZcrsFdqSs6lccE1OPMp
+9obKAFkadIbF6zhs8hX1bDE++vTkjzl66OwsbwHesr0ozrGS9/goMkA8PlL05RfT
+1EULeSYstUaVLSirLK/dm4wfZuHhF/wfVVtoxQIf62ZFc3kdWVT79oMdWbBIc762
+17gFVehqclPBo+s7g9oC27XJtT0eLYPPt3+yNHWGDFh/i3KGj5W0jR36xV9EWB3D
+/+bgFbhWwy0luqVFIOT9uMhk0QVsfMZ5bQr7DxCKlfbLtQNia9u/FYSeRF6MHo/3
+39cVi3o5sdxFyUv/uqoHIySGou+wu1VnMF988NTabb9ykk2YH2W/MMmG/92GWTI=
+=7u0F
+-----END PGP SIGNATURE-----
