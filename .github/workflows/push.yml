@@ -78,44 +78,42 @@ jobs:
         env:
           CHARTS_JSON: ${{ steps.config.outputs.result }}
           REF: ${{ steps.inputs.outputs.ref }}
-        # await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', 'secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
-        # helm package --sign --key gross --keyring secring.gpg 
         run: |
           cat <(echo -e "${{ secrets.GPG_SECRING }}") | gpg --batch --import
           gpg --export-secret-keys >~/.gnupg/secring.gpg
           gpg --list-keys
           helm package --sign --key gross --keyring ~/.gnupg/secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
-      # - name: Update index
-      #   working-directory: gh-pages
-      #   run: |
-      #     helm repo index .
-      #     git add index.yaml
-      # # TODO install @octokit/app and use it within github-script instead of relying on Step
-      # - name: Install Step CLI
-      #   env: 
-      #     VERSION: 0.18.2
-      #   run: |
-      #     curl -sLO https://github.com/smallstep/cli/releases/download/v${VERSION}/step-cli_${VERSION}_amd64.deb
-      #     sudo dpkg -i step-cli_${VERSION}_amd64.deb
-      #     rm step-cli_${VERSION}_amd64.deb
-      # - name: Create access token
-      #   id: token
-      #   env:
-      #     APP_ID: ${{ secrets.APP_ID }}
-      #     APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
-      #   run: |
-      #     jwt=$(step crypto jwt sign --key /dev/fd/3 --issuer $APP_ID --expiration $(date -d +5min +%s) --subtle 3<<< $APP_PRIVATE_KEY)
-      #     installation_id=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations | jq '.[] | select(.account.login == "${{ github.repository_owner }}") | .id')
-      #     token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations/$installation_id/access_tokens | jq -r '.token')
-      #     echo "::add-mask::$token"
-      #     echo "::set-output name=token::$token"
-      # - name: Commit and push changes
-      #   working-directory: gh-pages
-      #   run: |
-      #     token=$(echo -n "x-access-token:${{ steps.token.outputs.token}}" | base64)
-      #     git config --local --unset-all http.https://github.com/.extraheader
-      #     git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $token"
-      #     git config --local user.name "Ivan's charts"
-      #     git config --local user.email charts@demo.io
-      #     git commit -m "Publish helm chart ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}@${{ steps.inputs.outputs.ref }}"
-      #     git push
+      - name: Update index
+        working-directory: gh-pages
+        run: |
+          helm repo index .
+          git add index.yaml
+      # TODO install @octokit/app and use it within github-script instead of relying on Step
+      - name: Install Step CLI
+        env: 
+          VERSION: 0.18.2
+        run: |
+          curl -sLO https://github.com/smallstep/cli/releases/download/v${VERSION}/step-cli_${VERSION}_amd64.deb
+          sudo dpkg -i step-cli_${VERSION}_amd64.deb
+          rm step-cli_${VERSION}_amd64.deb
+      - name: Create access token
+        id: token
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+        run: |
+          jwt=$(step crypto jwt sign --key /dev/fd/3 --issuer $APP_ID --expiration $(date -d +5min +%s) --subtle 3<<< $APP_PRIVATE_KEY)
+          installation_id=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations | jq '.[] | select(.account.login == "${{ github.repository_owner }}") | .id')
+          token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $jwt" https://api.github.com/app/installations/$installation_id/access_tokens | jq -r '.token')
+          echo "::add-mask::$token"
+          echo "::set-output name=token::$token"
+      - name: Commit and push changes
+        working-directory: gh-pages
+        run: |
+          token=$(echo -n "x-access-token:${{ steps.token.outputs.token}}" | base64)
+          git config --local --unset-all http.https://github.com/.extraheader
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $token"
+          git config --local user.name "Ivan's charts"
+          git config --local user.email charts@demo.io
+          git commit -m "Publish helm chart ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}@${{ steps.inputs.outputs.ref }}"
+          git push
