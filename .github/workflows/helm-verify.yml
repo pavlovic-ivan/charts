@@ -6,6 +6,7 @@ on:
       GPG_PUBKEY:
         description: 'The GnuPG public key used to verify Helm Charts'
         required: true
+        type: string
     inputs:
       CHART:
         description: 'Full name of the Helm chart to verify'
