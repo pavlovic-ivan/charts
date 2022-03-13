@@ -77,14 +77,16 @@ jobs:
       - name: Import GPG key
         run: |
           cat <(echo -e "${{ secrets.GPG_SECRING }}") | gpg --batch --import
-          gpg --export-secret-keys >~/.gnupg/secring.gpg
+          gpg --export-secret-keys >~/.gnupg/keyring.gpg
       - name: Package charts
         uses: actions/github-script@v6
         env:
           CHARTS_JSON: ${{ steps.config.outputs.result }}
           REF: ${{ steps.inputs.outputs.ref }}
+          GPG_KEY: ${{ secrets.GPG_KEY }}
         with:
           script: |
+            const gpg_key = process.env.GPG_KEY
             const ref = process.env.REF
             const charts = JSON.parse(process.env.CHARTS_JSON)
             for (const chart of charts) {
@@ -96,7 +98,7 @@ jobs:
                     await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
                   }
                 }
-                await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', '/home/runner/.gnupg/secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
+                await exec.exec('helm', ['package', '--sign', '--key', gpg_key, '--keyring', '/home/runner/.gnupg/keyring.gpg', source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
             }
