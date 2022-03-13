@@ -74,15 +74,47 @@ jobs:
           repository: ${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}
           ref: ${{ steps.inputs.outputs.ref }}
           path: source
-      - name: Package charts
-        env:
-          CHARTS_JSON: ${{ steps.config.outputs.result }}
-          REF: ${{ steps.inputs.outputs.ref }}
+      - name: Import GPG key
         run: |
           cat <(echo -e "${{ secrets.GPG_SECRING }}") | gpg --batch --import
           gpg --export-secret-keys >~/.gnupg/secring.gpg
-          helm package --sign --key gross --keyring ~/.gnupg/secring.gpg source/deployment/helm-k8s -d gh-pages/siembol
-          ls -la gh-pages/siembol
+      - name: Package charts
+        uses: actions/github-script@v6
+        env:
+          CHARTS_JSON: ${{ steps.config.outputs.result }}
+          REF: ${{ steps.inputs.outputs.ref }}
+        with:
+          script: |
+            const ref = process.env.REF
+            const charts = JSON.parse(process.env.CHARTS_JSON)
+            for (const chart of charts) {
+              const globber = await glob.create(`source/${chart.source}`, {implicitDescendants: false})
+              for await (const source of globber.globGenerator()) {
+                if (chart.use_ref_as_version) {
+                  const version = ref.replace(new RegExp(chart.use_ref_as_version.pattern), chart.use_ref_as_version.replacement)
+                  for (const file of ['Chart.yaml', 'values.yaml']) {
+                    await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
+                  }
+                }
+                await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', '~/.gnupg/secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
+              }
+              await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
+              await exec.exec('git', ['add', `${chart.destination}.prov`], {cwd: 'gh-pages'})
+            }
+            let status = '';
+            await exec.exec('git', ['status', '--porcelain=v1'], {
+              cwd: 'gh-pages',
+              listeners: {
+                'stdout': data => {
+                  status += data.toString()
+                }
+              }
+            })
+            for (const line of status.split('\n')) {
+              if (line.length > 0 && !line.startsWith('A')) {
+                return core.setFailed(`Only expected files to be added, but that's not the case: ${line}`)
+              }
+            }
       - name: Update index
         working-directory: gh-pages
         run: |
