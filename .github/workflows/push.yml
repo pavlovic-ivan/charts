@@ -99,7 +99,6 @@ jobs:
                 await exec.exec('helm', ['package', '--sign', '--key', 'gross', '--keyring', '/home/runner/.gnupg/secring.gpg', source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
-              await exec.exec('git', ['add', `${chart.destination}.prov`], {cwd: 'gh-pages'})
             }
             let status = '';
             await exec.exec('git', ['status', '--porcelain=v1'], {
