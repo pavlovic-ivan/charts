@@ -99,7 +99,7 @@ jobs:
                     await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
                   }
                 }
-                await exec.exec('helm', ['package', '--sign', '--key', gpg_key, '--keyring', `${home_dir}/.gnupg/keyring.gpg`, source, '-d', `gh-pages/${chart.destination}`])
+                await exec.exec('helm', ['package', '--sign', '--key', gpg_key, '--keyring', '~/.gnupg/keyring.gpg', source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
             }
