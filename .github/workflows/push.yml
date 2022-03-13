@@ -87,6 +87,7 @@ jobs:
         with:
           script: |
             const gpg_key = process.env.GPG_KEY
+            const home_dir = require("os").homedir();
             const ref = process.env.REF
             const charts = JSON.parse(process.env.CHARTS_JSON)
             for (const chart of charts) {
@@ -98,7 +99,7 @@ jobs:
                     await exec.exec('yq', ['-i', `.version = "${version}"`, `${source}/${file}`])
                   }
                 }
-                await exec.exec('helm', ['package', '--sign', '--key', gpg_key, '--keyring', '/home/runner/.gnupg/keyring.gpg', source, '-d', `gh-pages/${chart.destination}`])
+                await exec.exec('helm', ['package', '--sign', '--key', gpg_key, '--keyring', `${home_dir}/.gnupg/keyring.gpg`, source, '-d', `gh-pages/${chart.destination}`])
               }
               await exec.exec('git', ['add', chart.destination], {cwd: 'gh-pages'})
             }
